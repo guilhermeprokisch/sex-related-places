@@ -166,7 +166,7 @@ class SexPlacesNearBy:
 
     def load_place(self, keyword):
         """
-        Given a keyword, it loads the place returned by the API to self.places.
+        Given a keyword it loads the place returned by the API to self.places.
         """
         response = self.get(keyword)
         return self.parse(response)
@@ -210,7 +210,7 @@ class SexPlacesNearBy:
         return ''.join(parts)
 
     def keyword_from_url(self, url):
-        """Given a URL, it returns the keyword used in the query."""
+        """Given a URL it returns the keyword used in the query."""
         qs = parse_qs(urlparse(url).query)
         try:
             keyword = qs.get('keyword')
