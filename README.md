@@ -11,11 +11,11 @@ This script was originally written by by [Guilherme Prokisch](https://github.com
 
 To use the full dataset (+60k companies) use:
 
-```python
+```console
 $ python sex_places.py
 ```
 To use a sample of the dataset add a number after the command. For example this will run with only 42 companies:
 
-```python
+```console
 $ python sex_places.py 42
 ```
