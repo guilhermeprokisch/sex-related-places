@@ -7,6 +7,7 @@ import sys
 from configparser import RawConfigParser
 from datetime import date
 from itertools import chain
+from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import pandas as pd
@@ -253,23 +254,27 @@ def write_to_csv(path, place=None, **kwargs):
             writer.writerow(contents)
 
 
-def find_newest_file(name):
+def find_newest_file(pattern='*.*', source_dir='.'):
     """
     Assuming that the files will be in the form of :
     yyyy-mm-dd-type_of_file.xz we can try to find the newest file
-    based on the date, but if the file doesn't exist fallback to another
-    date until all dates are exhausted
+    based on the date.
     """
-    date_regex = re.compile('\d{4}-\d{2}-\d{2}')
+    files = sorted(Path(source_dir).glob(pattern))
+    file = files.pop()
 
-    matches = (date_regex.findall(f) for f in os.listdir(DATA_DIR))
-    dates = sorted(set([l[0] for l in matches if l]), reverse=True)
-    for d in dates:
-        filename = os.path.join(DATA_DIR, '{}-{}.xz'.format(d, name))
-        if os.path.isfile(filename):
-            return filename
+    if not file:
+        return None
 
-    return None
+    return str(file)
+
+
+def load_newest_dataset(pattern, usecols, na_value=''):
+    print('Loading companies dataset…')
+    filepath = find_newest_file(pattern)
+    dataset = pd.read_csv(filepath, usecols=usecols, low_memory=False)
+    dataset = dataset.fillna(value=na_value)
+    return dataset
 
 
 def get_name(company):
@@ -280,11 +285,11 @@ def get_name(company):
 
 
 if __name__ == '__main__':
-    print('Loading companies dataset…')
-    usecols = ('cnpj', 'trade_name', 'name', 'latitude', 'longitude')
-    companies_path = find_newest_file('companies')
-    companies = pd.read_csv(companies_path, usecols=usecols, low_memory=False)
-    companies = companies.fillna(value='')
+
+    companies = load_newest_dataset(
+        pattern='**/*companies.xz',
+        usecols=('cnpj', 'trade_name', 'name', 'latitude', 'longitude')
+    )
 
     try:
         sample = int(sys.argv[1])
